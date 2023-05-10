@@ -1,38 +1,10 @@
 import math
+import time
 from PIL import Image
 import numpy as np
-from deepface.commons import distance
-from deepface.detectors import (
-  
-    MtcnnWrapper,
-  
-)
+from face_recognition.commons import distance
+from face_recognition.detectors import MtcnnWrapper
 
-
-def build_model(detector_backend):
-
-    global face_detector_obj  # singleton design pattern
-
-    backends = {
-     
-        "mtcnn": MtcnnWrapper.build_model,
-        
-    }
-
-    if not "face_detector_obj" in globals():
-        face_detector_obj = {}
-
-    built_models = list(face_detector_obj.keys())
-    if detector_backend not in built_models:
-        face_detector = backends.get(detector_backend)
-
-        if face_detector:
-            face_detector = face_detector()
-            face_detector_obj[detector_backend] = face_detector
-        else:
-            raise ValueError("invalid detector_backend passed - " + detector_backend)
-
-    return face_detector_obj[detector_backend]
 
 
 def detect_face(face_detector, detector_backend, img, align=True):
@@ -48,23 +20,14 @@ def detect_face(face_detector, detector_backend, img, align=True):
     return face, region, confidence
 
 
-def detect_faces(face_detector, detector_backend, img, align=True):
-
-    backends = {
- 
-        "mtcnn": MtcnnWrapper.detect_face,
- 
-    }
-
-    detect_face_fn = backends.get(detector_backend)
-
-    if detect_face_fn:  # pylint: disable=no-else-return
-        obj = detect_face_fn(face_detector, img, align)
+def detect_faces( img, align=True):
+    tic = time.time()
+    face_detector=MtcnnWrapper.build_model()
+    obj = MtcnnWrapper.detect_face(face_detector, img, align)
         # obj stores list of (detected_face, region, confidence)
-        return obj
-    else:
-        raise ValueError("invalid detector_backend passed - " + detector_backend)
-
+    print("MTCNN detect_face took ", time.time() - tic, " seconds")
+    return obj
+   
 
 def alignment_procedure(img, left_eye, right_eye):
 

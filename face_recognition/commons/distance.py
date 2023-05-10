@@ -21,11 +21,9 @@ def findEuclideanDistance(source_representation, test_representation):
     return euclidean_distance
 
 
-def l2_normalize(x):
-    return x / np.sqrt(np.sum(np.multiply(x, x)))
 
 
-def findThreshold(model_name):
+def findThreshold():
 
     base_threshold = {"cosine": 0.40, "euclidean": 0.55, "euclidean_l2": 0.75}
 
@@ -34,6 +32,7 @@ def findThreshold(model_name):
        
     }
 
-    threshold = thresholds.get(model_name, base_threshold).get("cosine", 0.4)
+    # threshold = thresholds.get(model_name, base_threshold).get("cosine", 0.4)
+    threshold=0.4
 
     return threshold

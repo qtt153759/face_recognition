@@ -3,8 +3,8 @@ import time
 import numpy as np
 import pandas as pd
 import cv2
-from deepface import DeepFace
-from deepface.commons import functions
+from face_recognition import FaceRecognition
+from face_recognition.commons import functions
 
 # dependency configuration
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -14,8 +14,8 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 def analysis(
     db_path,
-    model_name="VGG-Face",
-    detector_backend="opencv",
+  
+    isSkip=False,
     source=0,
     time_threshold=5,
     frame_threshold=5,
@@ -24,24 +24,22 @@ def analysis(
     text_color = (255, 255, 255)
     pivot_img_size = 112  # face recognition result image
 
-    enable_emotion = True
-    enable_age_gender = True
     # ------------------------
     # find custom values for this input set
-    target_size = functions.find_target_size(model_name=model_name)
+    target_size = (224, 224)
     # ------------------------
     # build models once to store them in the memory
     # otherwise, they will be built after cam started and this will cause delays
-    DeepFace.build_model(model_name=model_name)
-    print(f"facial recognition model {model_name} is just built")
+    FaceRecognition.build_model()
+    print(f"facial recognition model VGG is just built")
 
 
     # call a dummy find function for db_path once to create embeddings in the initialization
-    DeepFace.find(
+    FaceRecognition.find(
         img_path=np.zeros([224, 224, 3]),
         db_path=db_path,
-        model_name=model_name,
-        detector_backend=detector_backend,
+        # model_name=model_name,
+        isSkip=isSkip,
         enforce_detection=False,
     )
     # -----------------------
@@ -69,10 +67,10 @@ def analysis(
         if freeze == False:
             try:
                 # just extract the regions to highlight in webcam
-                face_objs = DeepFace.extract_faces(
+                face_objs = FaceRecognition.extract_faces(
                     img_path=img,
                     target_size=target_size,
-                    detector_backend=detector_backend,
+                    isSkip=isSkip,
                     enforce_detection=False,
                 )
                 faces = []
@@ -134,7 +132,6 @@ def analysis(
             base_img = raw_img.copy()
             detected_faces_final = detected_faces.copy()
             tic = time.time()
-
         if freeze == True:
 
             toc = time.time()
@@ -165,14 +162,15 @@ def analysis(
                         # --------------------------------
                         # face recognition
                         # call find function for custom_face
-
-                        dfs = DeepFace.find(
+                        
+                        dfs = FaceRecognition.find(
                             img_path=custom_face,
                             db_path=db_path,
-                            model_name=model_name,
-                            detector_backend=detector_backend,
+                            # model_name=model_name,
+                            # detector_backend=detector_backend,
+                            isSkip=isSkip,
                             enforce_detection=False,
-                            silent=True,
+                            silent=False,
                         )
 
                         if len(dfs) > 0:
@@ -186,10 +184,10 @@ def analysis(
                                 # to use this source image as is
                                 display_img = cv2.imread(label)
                                 # to use extracted face
-                                source_objs = DeepFace.extract_faces(
+                                source_objs = FaceRecognition.extract_faces(
                                     img_path=label,
                                     target_size=(pivot_img_size, pivot_img_size),
-                                    detector_backend=detector_backend,
+                                    isSkip=isSkip,
                                     enforce_detection=False,
                                     align=False,
                                 )
@@ -435,7 +433,7 @@ def analysis(
                                         )
                                 except Exception as err:  # pylint: disable=broad-except
                                     print(str(err))
-
+                        
                         tic = time.time()  # in this way, freezed image can show 5 seconds
 
                         # -------------------------------
@@ -464,7 +462,6 @@ def analysis(
 
         else:
             cv2.imshow("img", img)
-
         if cv2.waitKey(1) & 0xFF == ord("q"):  # press q to quit
             break
 
