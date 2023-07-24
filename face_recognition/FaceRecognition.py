@@ -12,7 +12,6 @@ import pandas as pd
 from tqdm import tqdm
 import cv2
 import tensorflow as tf
-from deprecated import deprecated
 
 # package dependencies
 from face_recognition.basemodels import (
@@ -167,7 +166,7 @@ def find(
     )
 
     resp_obj = []
-
+    
     for target_img, target_region, _ in target_objs:
         target_embedding_obj = represent(
             img_path=target_img,
@@ -282,37 +281,37 @@ def represent(
     return resp_objs
 
 
-def stream(
-    db_path="",
-    # model_name="VGG-Face",
-    # detector_backend="opencv",
-    isSkip=False,
-    # enable_face_analysis=True,
-    source=0,
-    time_threshold=1,
-    frame_threshold=1,
-):
+# def stream(
+#     db_path="",
+#     # model_name="VGG-Face",
+#     # detector_backend="opencv",
+#     isSkip=False,
+#     # enable_face_analysis=True,
+#     source=0,
+#     time_threshold=1,
+#     frame_threshold=1,
+# ):
 
-    if time_threshold < 1:
-        raise ValueError(
-            "time_threshold must be greater than the value 1 but you passed " + str(time_threshold)
-        )
+#     if time_threshold < 1:
+#         raise ValueError(
+#             "time_threshold must be greater than the value 1 but you passed " + str(time_threshold)
+#         )
 
-    if frame_threshold < 1:
-        raise ValueError(
-            "frame_threshold must be greater than the value 1 but you passed "
-            + str(frame_threshold)
-        )
+#     if frame_threshold < 1:
+#         raise ValueError(
+#             "frame_threshold must be greater than the value 1 but you passed "
+#             + str(frame_threshold)
+#         )
 
-    realtime.analysis(
-        db_path,
-        # model_name,
-        # detector_backend,
-        isSkip=isSkip,
-        source=source,
-        time_threshold=time_threshold,
-        frame_threshold=frame_threshold,
-    )
+#     realtime.analysis(
+#         db_path,
+#         # model_name,
+#         # detector_backend,
+#         isSkip=isSkip,
+#         source=source,
+#         time_threshold=time_threshold,
+#         frame_threshold=frame_threshold,
+#     )
 
 
 def extract_faces(
@@ -352,9 +351,79 @@ def extract_faces(
     return resp_objs
 
 
-# ---------------------------
-# deprecated functions
+def analyze(
+    img,
+    target_size=(224, 224),
+    # actions=("emotion", "age", "gender", "race"),
+    # enforce_detection=True,
+    # detector_backend="opencv",
+    # align=True,
+    # silent=False,
+):
+    # ---------------------------------
+    # validate actions
+    # if isinstance(actions, str):
+    #     actions = (actions,)
 
+    # actions = list(actions)
+    # ---------------------------------
+    # build models
+    models = {}
+    # if "emotion" in actions:
+    #     models["emotion"] = build_model("Emotion")
+
+    # if "age" in actions:
+    #     models["age"] = build_model("Age")
+
+    # if "gender" in actions:
+    #     models["gender"] = build_model("Gender")
+
+    # if "race" in actions:
+    #     models["race"] = build_model("Race")
+    # # ---------------------------------
+    resp_objects = []
+    
+ 
+    # The function cv2.imshow() is used to display an image in a window.
+    try :
+        face_objs = extract_faces(
+            img_path=img,
+            target_size=target_size,
+        )
+        print("check face_obj",len(face_objs))
+        print(face_objs[0]["facial_area"])
+        faces = []
+        for face_obj in face_objs:
+            facial_area = face_obj["facial_area"]
+            faces.append(
+                (
+                    facial_area["x"],
+                    facial_area["y"],
+                    facial_area["w"],
+                    facial_area["h"],
+                )
+            )
+    except:  # to avoid exception if no face detected
+        faces = []
+    print("face len",len(faces))
+    image = cv2.imread(img)
+    for x, y, w, h in faces:
+              # discard small detected faces
+
+                image=cv2.rectangle(
+                    image, (x, y), (x + w, y + h), (67, 67, 67), 1
+                )  # draw rectangle to main image
+
+
+
+                # -------------------------------------
+
+    cv2.imshow("final",image) 
+    cv2.waitKey(0)
+# and finally destroy/close all open windows
+    cv2.destroyAllWindows()
+
+    return resp_objects
 
 
 # ---------------------------

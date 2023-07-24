@@ -165,43 +165,43 @@ def extract_faces(
                 current_img = cv2.cvtColor(current_img, cv2.COLOR_BGR2GRAY)
 
             # resize and padding
-            if current_img.shape[0] > 0 and current_img.shape[1] > 0:
-                factor_0 = target_size[0] / current_img.shape[0]
-                factor_1 = target_size[1] / current_img.shape[1]
-                factor = min(factor_0, factor_1)
+            # if current_img.shape[0] > 0 and current_img.shape[1] > 0:
+            #     factor_0 = target_size[0] / current_img.shape[0]
+            #     factor_1 = target_size[1] / current_img.shape[1]
+            #     factor = min(factor_0, factor_1)
 
-                dsize = (
-                    int(current_img.shape[1] * factor),
-                    int(current_img.shape[0] * factor),
-                )
-                current_img = cv2.resize(current_img, dsize)
+            #     dsize = (
+            #         int(current_img.shape[1] * factor),
+            #         int(current_img.shape[0] * factor),
+            #     )
+            #     current_img = cv2.resize(current_img, dsize)
 
-                diff_0 = target_size[0] - current_img.shape[0]
-                diff_1 = target_size[1] - current_img.shape[1]
-                if grayscale is False:
-                    # Put the base image in the middle of the padded image
-                    current_img = np.pad(
-                        current_img,
-                        (
-                            (diff_0 // 2, diff_0 - diff_0 // 2),
-                            (diff_1 // 2, diff_1 - diff_1 // 2),
-                            (0, 0),
-                        ),
-                        "constant",
-                    )
-                else:
-                    current_img = np.pad(
-                        current_img,
-                        (
-                            (diff_0 // 2, diff_0 - diff_0 // 2),
-                            (diff_1 // 2, diff_1 - diff_1 // 2),
-                        ),
-                        "constant",
-                    )
+            #     diff_0 = target_size[0] - current_img.shape[0]
+            #     diff_1 = target_size[1] - current_img.shape[1]
+            #     if grayscale is False:
+            #         # Put the base image in the middle of the padded image
+            #         current_img = np.pad(
+            #             current_img,
+            #             (
+            #                 (diff_0 // 2, diff_0 - diff_0 // 2),
+            #                 (diff_1 // 2, diff_1 - diff_1 // 2),
+            #                 (0, 0),
+            #             ),
+            #             "constant",
+            #         )
+            #     else:
+            #         current_img = np.pad(
+            #             current_img,
+            #             (
+            #                 (diff_0 // 2, diff_0 - diff_0 // 2),
+            #                 (diff_1 // 2, diff_1 - diff_1 // 2),
+            #             ),
+            #             "constant",
+            #         )
 
-            # double check: if target image is not still the same size with target.
-            if current_img.shape[0:2] != target_size:
-                current_img = cv2.resize(current_img, target_size)
+            # # double check: if target image is not still the same size with target.
+            # if current_img.shape[0:2] != target_size:
+            #     current_img = cv2.resize(current_img, target_size)
 
             # normalizing the image pixels
             # what this line doing? must?
@@ -239,14 +239,6 @@ def normalize_input(img, normalization="base"):
     if normalization == "raw":
         pass  # return just restored pixels
 
-    elif normalization == "Facenet":
-        mean, std = img.mean(), img.std()
-        img = (img - mean) / std
-
-    elif normalization == "Facenet2018":
-        # simply / 127.5 - 1 (similar to facenet 2018 model preprocessing step as @iamrishab posted)
-        img /= 127.5
-        img -= 1
 
     elif normalization == "VGGFace":
         # mean subtraction based on VGGFace1 training data
@@ -260,12 +252,6 @@ def normalize_input(img, normalization="base"):
         img[..., 1] -= 103.8827
         img[..., 2] -= 131.0912
 
-    elif normalization == "ArcFace":
-        # Reference study: The faces are cropped and resized to 112×112,
-        # and each pixel (ranged between [0, 255]) in RGB images is normalised
-        # by subtracting 127.5 then divided by 128.
-        img -= 127.5
-        img /= 128
     else:
         raise ValueError(f"unimplemented normalization type - {normalization}")
 
